@@ -1,0 +1,6 @@
+package com.lightning.pinginator
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}
