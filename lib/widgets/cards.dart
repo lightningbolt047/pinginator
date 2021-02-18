@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:pinginator/config.dart';
-import 'package:easyping/easyping.dart';
+import 'package:pinginator/services/ping_service.dart';
 
 class GamePingCard extends StatefulWidget {
 

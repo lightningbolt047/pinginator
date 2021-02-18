@@ -32,7 +32,7 @@ dependencies:
   community_material_icon: ^5.8.55
   flutter_animation_progress_bar: ^1.0.6
   shared_preferences: ^0.5.12+4
-  easyping: ^1.0.1
+  http: ^0.12.2
 
 dev_dependencies:
   flutter_test:
