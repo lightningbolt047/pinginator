@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                   (context,index){
-                    return GamePingCard(gameMap[gameName]['serverNames'][index],gameMap[gameName]['serverAddresses'][index]);
+                    return GamePingCard(gameMap[gameName]['serverNames'][index],gameMap[gameName]['serverAddresses'][index],gameMap[gameName]['themeColor']);
                   },
                 childCount: gameMap[gameName]['serverNames'].length
               ),

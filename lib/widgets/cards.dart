@@ -1,56 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:pinginator/config.dart';
 import 'package:pinginator/services/ping_service.dart';
+import 'dart:async';
 
 class GamePingCard extends StatefulWidget {
 
   final String serverName,serverURL;
+  final Color secondaryColor;
 
-  GamePingCard(this.serverName,this.serverURL);
+  GamePingCard(this.serverName,this.serverURL,this.secondaryColor);
 
   @override
-  _GamePingCardState createState() => _GamePingCardState(this.serverName,this.serverURL);
+  _GamePingCardState createState() => _GamePingCardState(this.serverName,this.serverURL,this.secondaryColor);
 }
 
 class _GamePingCardState extends State<GamePingCard> {
+
+
+
+  var androidPlatform=MethodChannel('flutter.native/helper');
+  String pingExecResult;
+  Timer timer;
+  Color secondaryColor;
+  double pingTime;
+
+  Future<String> invokeAndroidMethod() async{
+    try{
+      timer=Timer(Duration(seconds: 1),() async{
+        print("Ping called $serverName");
+        pingExecResult = await androidPlatform.invokeMethod('getPingTime',serverURL);
+        print("Ping complete $serverName");
+        setState(() {
+          getPingAsDouble(pingExecResult);
+        });
+        print("Avg ping: $pingTime");
+      });
+      return pingExecResult;
+
+    }catch(e){
+      print(e);
+      return "Platform Exception";
+    }
+  }
 
   final serverName,serverURL;
   List<double> responseTimes=[];
   double lastResponseTime=0;
 
-  _GamePingCardState(this.serverName,this.serverURL);
+  _GamePingCardState(this.serverName,this.serverURL,this.secondaryColor);
 
-  void keepPinging() async{
-    for(int i=0;i<maxNumPings;i++){
-      lastResponseTime=await ping(serverURL);
-      responseTimes.add(lastResponseTime);
-      print(lastResponseTime);
-      setState(() {});
+  void getPingAsDouble(String pingExecResult){
+    List<String> lineByLineResponse=pingExecResult.split("\n");
+    if(lineByLineResponse.length<11){
+      pingTime=-1;
+      return;
     }
+    pingTime=double.parse(lineByLineResponse[9].split("/")[4]);
   }
 
+
   int getIntAverage(){
-    double avg=0;
-    for(int i=0;i<maxNumPings;i++){
-      avg+=responseTimes[i];
+    if(pingTime==-1 || pingTime==null){
+      return 0;
     }
-    avg/=maxNumPings;
-    return avg.toInt();
+    return pingTime.toInt();
   }
 
   int getProgressBarValue(bool forProgressBar){
-    if(responseTimes.length==maxNumPings){
-      if(getIntAverage()>500 && forProgressBar){
-        return 500;
-      }
-      return getIntAverage();
-    }
-    if(lastResponseTime>500 && forProgressBar){
+    if(getIntAverage()>500 && forProgressBar){
       return 500;
     }
-    return lastResponseTime.toInt();
+    return getIntAverage();
   }
+
+  Widget getValueTextWidget(){
+    if(pingTime==null){
+      return Text("Loading...");
+    }
+    return Text(pingTime==-1?"Fail":"${getProgressBarValue(false)}ms");
+  }
+
 
   @override
   void setState(fn) {
@@ -61,7 +92,7 @@ class _GamePingCardState extends State<GamePingCard> {
 
   @override
   void initState() {
-    keepPinging();
+    invokeAndroidMethod();
     super.initState();
   }
 
@@ -92,7 +123,7 @@ class _GamePingCardState extends State<GamePingCard> {
                     size: 10,
                   ),
                 ),
-                Text("${getProgressBarValue(false)}ms")
+                getValueTextWidget(),
               ],
             )
           ],
