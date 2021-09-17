@@ -1,5 +1,5 @@
 # pinginator
 
-A Flutter application to ping game servers and check their ping time
+A Flutter application to ping game servers and check their Round Trip Time time
 
-Currently supports Fortnite only
+Currently supports Fortnite
